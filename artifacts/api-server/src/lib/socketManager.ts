@@ -97,6 +97,10 @@ export function initSocketIO(httpServer: HttpServer): SocketServer {
       }
     });
 
+    socket.on("leaveMatch", (matchId: number) => {
+      socket.leave(`match:${matchId}`);
+    });
+
     socket.on("openBlock", async ({ matchId, blockIndex }: { matchId: number; blockIndex: number }) => {
       try {
         const questions = await db

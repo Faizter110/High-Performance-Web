@@ -14,6 +14,7 @@ export function useGameSync(matchId: number | null) {
     socket.emit("joinMatch", matchId);
 
     const handleGameState = (state: GameState) => {
+      if (state.matchId !== matchId) return; // ignore events for other match rooms
       queryClient.setQueryData(getGetMatchStateQueryKey(matchId), state);
       if (state.buzzerStatus) {
         setBuzzer(state.buzzerStatus);
