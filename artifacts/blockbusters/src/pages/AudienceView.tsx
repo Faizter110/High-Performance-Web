@@ -20,7 +20,7 @@ export default function AudienceView() {
     if (gameState?.winnerTeam) {
       const duration = 3000;
       const end = Date.now() + duration;
-      const colors = gameState.winnerTeam === 'Red' ? ['#ef4444', '#b91c1c'] : ['#3b82f6', '#1d4ed8'];
+      const colors = gameState.winnerTeam === 'red' ? ['#ef4444', '#b91c1c'] : ['#3b82f6', '#1d4ed8'];
 
       (function frame() {
         confetti({
@@ -49,50 +49,48 @@ export default function AudienceView() {
 
   const size = match.boardSize === '5x5' ? 5 : 3;
   const blocks = gameState.blocks || [];
-  
-  const redBlocks = blocks.filter(b => b.owner === 'Red').length;
-  const blueBlocks = blocks.filter(b => b.owner === 'Blue').length;
+
+  const redBlocks = blocks.filter(b => b.owner === 'red').length;
+  const blueBlocks = blocks.filter(b => b.owner === 'blue').length;
   const { red: redMP, blue: blueMP } = findMatchPoints(blocks, size);
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
-      {/* Dynamic Background */}
       <div className={cn(
         "absolute inset-0 transition-opacity duration-500 pointer-events-none opacity-20",
-        buzzer === 'Red' && "bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.5),transparent)]",
-        buzzer === 'Blue' && "bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.5),transparent)]"
+        buzzer === 'red' && "bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.5),transparent)]",
+        buzzer === 'blue' && "bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.5),transparent)]"
       )} />
 
-      {/* Full screen header layout */}
       <div className="flex justify-between items-start p-8 relative z-10">
-         <div className="w-[300px]">
-           <TeamScore 
-             team="Red" 
-             name={match.redTeamName} 
-             blocksOwned={redBlocks} 
-             activeBuzzer={buzzer === 'Red'}
-           />
-         </div>
-         
-         <div className="flex flex-col items-center pt-4">
-           <img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="Blockbusters" className="h-24 object-contain opacity-80" />
-           {match.round && <div className="text-white/60 font-display tracking-[0.3em] uppercase mt-2">{match.round}</div>}
-         </div>
+        <div className="w-[300px]">
+          <TeamScore
+            team="Red"
+            name={match.redTeamName}
+            blocksOwned={redBlocks}
+            activeBuzzer={buzzer === 'red'}
+          />
+        </div>
 
-         <div className="w-[300px]">
-           <TeamScore 
-             team="Blue" 
-             name={match.blueTeamName} 
-             blocksOwned={blueBlocks} 
-             activeBuzzer={buzzer === 'Blue'}
-           />
-         </div>
+        <div className="flex flex-col items-center pt-4">
+          <img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="Blockbusters" className="h-24 object-contain opacity-80" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          {match.round && <div className="text-white/60 font-display tracking-[0.3em] uppercase mt-2">{match.round}</div>}
+        </div>
+
+        <div className="w-[300px]">
+          <TeamScore
+            team="Blue"
+            name={match.blueTeamName}
+            blocksOwned={blueBlocks}
+            activeBuzzer={buzzer === 'blue'}
+          />
+        </div>
       </div>
 
       <div className="flex-1 flex items-center justify-center pb-12 relative z-10 scale-[1.15]">
-        <HexBoard 
-          size={size} 
-          blocks={blocks} 
+        <HexBoard
+          size={size}
+          blocks={blocks}
           redMatchPoints={redMP}
           blueMatchPoints={blueMP}
           interactive={false}
@@ -101,12 +99,12 @@ export default function AudienceView() {
 
       {gameState.winnerTeam && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-1000">
-           <div className={cn(
-             "text-[12vw] font-display font-black uppercase text-transparent bg-clip-text leading-none drop-shadow-[0_0_50px_currentColor]",
-             gameState.winnerTeam === 'Red' ? "bg-gradient-to-b from-red-400 to-red-600 text-red-500" : "bg-gradient-to-b from-blue-400 to-blue-600 text-blue-500"
-           )}>
-             {gameState.winnerTeam === 'Red' ? match.redTeamName : match.blueTeamName} WINS!
-           </div>
+          <div className={cn(
+            "text-[12vw] font-display font-black uppercase text-transparent bg-clip-text leading-none drop-shadow-[0_0_50px_currentColor]",
+            gameState.winnerTeam === 'red' ? "bg-gradient-to-b from-red-400 to-red-600 text-red-500" : "bg-gradient-to-b from-blue-400 to-blue-600 text-blue-500"
+          )}>
+            {gameState.winnerTeam === 'red' ? match.redTeamName : match.blueTeamName} WINS!
+          </div>
         </div>
       )}
     </div>

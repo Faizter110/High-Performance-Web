@@ -2,26 +2,20 @@ import React, { useState } from 'react';
 import { BlockState } from '@workspace/api-client-react';
 
 // ─── Hex geometry (pointy-top hexagons) ───────────────────────────────────────
-const R = 42;                         // circumradius
-const DX = Math.sqrt(3) * R;          // horizontal spacing between centers
-const DY = 1.5 * R;                   // vertical spacing between row centers
-const PAD = R * 0.6;                  // padding around the full grid
+const R = 42;
+const DX = Math.sqrt(3) * R;
+const DY = 1.5 * R;
+const PAD = R * 0.6;
 
-/**
- * Returns the SVG polygon points string for a pointy-top hex
- * centred at (cx, cy) with circumradius r.
- */
 function hexPoints(cx: number, cy: number, r: number): string {
   const pts: string[] = [];
   for (let i = 0; i < 6; i++) {
-    // pointy-top: first vertex at the top (angle = -90°)
     const angle = (Math.PI / 3) * i - Math.PI / 2;
     pts.push(`${(cx + r * Math.cos(angle)).toFixed(2)},${(cy + r * Math.sin(angle)).toFixed(2)}`);
   }
   return pts.join(' ');
 }
 
-/** Centre coordinates for a hex at (row, col) in the total grid */
 function getCenter(row: number, col: number): { x: number; y: number } {
   const isOddRow = row % 2 !== 0;
   return {
@@ -30,50 +24,31 @@ function getCenter(row: number, col: number): { x: number; y: number } {
   };
 }
 
-// ─── Grid cell classification ─────────────────────────────────────────────────
 type CellRole = 'red-border' | 'blue-border' | 'inner' | 'empty';
 
-/**
- * The board is rendered as a (size + 2) × (size + 2) grid.
- *   size=5 → 7×7  |  size=3 → 5×5
- *
- * Layout:
- *   - Corners (top-left, top-right, bottom-left, bottom-right) → empty
- *   - Top & bottom rows (excluding corners)                     → BLUE border
- *   - Left & right columns (excluding corners)                  → RED border
- *   - All remaining cells                                        → inner (playable)
- */
 function cellRole(row: number, col: number, totalSize: number): CellRole {
   const last = totalSize - 1;
-  const isCorner =
-    (row === 0 || row === last) && (col === 0 || col === last);
+  const isCorner = (row === 0 || row === last) && (col === 0 || col === last);
   if (isCorner) return 'empty';
   if (row === 0 || row === last) return 'blue-border';
   if (col === 0 || col === last) return 'red-border';
   return 'inner';
 }
 
-/** Maps a grid (row, col) to the game block index (0-based) */
 function toBlockIndex(row: number, col: number, innerSize: number): number {
   return (row - 1) * innerSize + (col - 1);
 }
 
-// ─── SVG dimensions ───────────────────────────────────────────────────────────
 function calcViewBox(totalCols: number, totalRows: number) {
-  // leftmost hex tip:  even-row col-0 center − DX/2
   const vbX = -DX / 2 - PAD;
-  // topmost hex tip:   row-0 center − R
   const vbY = -R - PAD;
-  // rightmost hex tip: odd-row last-col center + DX/2
   const vbW = (totalCols - 1) * DX + DX / 2 + DX + PAD * 2;
-  // bottommost hex tip: last-row center + R
   const vbH = (totalRows - 1) * DY + 2 * R + PAD * 2;
   return `${vbX.toFixed(1)} ${vbY.toFixed(1)} ${vbW.toFixed(1)} ${vbH.toFixed(1)}`;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
 interface HexBoardProps {
-  size: number;                        // inner grid: 3 or 5
+  size: number;
   blocks: BlockState[];
   onBlockClick?: (block: BlockState) => void;
   redMatchPoints?: number[];
@@ -90,10 +65,9 @@ export function HexBoard({
   interactive = false,
 }: HexBoardProps) {
   const [hovered, setHovered] = useState<number | null>(null);
-  const totalSize = size + 2;          // 5→7, 3→5
+  const totalSize = size + 2;
   const viewBox = calcViewBox(totalSize, totalSize);
 
-  // Build the list of all visible cells
   type Cell = {
     row: number; col: number;
     cx: number; cy: number;
@@ -127,7 +101,6 @@ export function HexBoard({
       style={{ maxHeight: '78vh', overflow: 'visible' }}
     >
       <defs>
-        {/* Glow filter for owned blocks */}
         <filter id="glow-red" x="-30%" y="-30%" width="160%" height="160%">
           <feGaussianBlur stdDeviation="4" result="blur" />
           <feMerge>
@@ -145,14 +118,13 @@ export function HexBoard({
       </defs>
 
       {cells.map(({ row, col, cx, cy, role, block, blockIdx }) => {
-        const isOwnerRed  = block?.owner === 'Red';
-        const isOwnerBlue = block?.owner === 'Blue';
+        const isOwnerRed  = block?.owner === 'red';
+        const isOwnerBlue = block?.owner === 'blue';
         const isHovered   = hovered === blockIdx && interactive && !block?.owner;
         const isRedMP     = blockIdx !== undefined && redMatchPoints.includes(blockIdx);
         const isBlueMP    = blockIdx !== undefined && blueMatchPoints.includes(blockIdx);
         const isMP        = isRedMP || isBlueMP;
 
-        // ── fill colour ──────────────────────────────────────────────────────
         let fill: string;
         let stroke: string;
         let strokeWidth: number;
@@ -166,7 +138,6 @@ export function HexBoard({
           stroke      = '#2980B9';
           strokeWidth = 1.5;
         } else {
-          // inner / playable
           if (isOwnerRed) {
             fill        = '#C0392B';
             stroke      = '#E74C3C';
@@ -204,19 +175,15 @@ export function HexBoard({
             onMouseLeave={() => setHovered(null)}
             style={{ cursor: isClickable ? 'pointer' : 'default' }}
           >
-            {/* Main hex body */}
             <polygon
               points={hexPoints(cx, cy, R - 1.5)}
               fill={fill}
               stroke={stroke}
               strokeWidth={strokeWidth}
               filter={filter}
-              style={{
-                transition: 'fill 0.4s ease, filter 0.4s ease',
-              }}
+              style={{ transition: 'fill 0.4s ease, filter 0.4s ease' }}
             />
 
-            {/* Inner hex body highlight (3D effect) */}
             {(role === 'red-border' || role === 'blue-border') && (
               <polygon
                 points={hexPoints(cx, cy - 2, R * 0.65)}
@@ -226,7 +193,6 @@ export function HexBoard({
               />
             )}
 
-            {/* Match-point pulsing border */}
             {role === 'inner' && isMP && !block?.owner && (
               <polygon
                 points={hexPoints(cx, cy, R * 0.88)}
@@ -248,7 +214,6 @@ export function HexBoard({
               </polygon>
             )}
 
-            {/* Label */}
             {role === 'inner' && block && (
               <text
                 x={cx}
@@ -263,7 +228,7 @@ export function HexBoard({
                 pointerEvents="none"
                 style={{ transition: 'fill 0.4s ease' }}
               >
-                {block.owner ? (block.owner === 'Red' ? 'R' : 'B') : displayNum}
+                {block.owner ? (block.owner === 'red' ? 'R' : 'B') : displayNum}
               </text>
             )}
           </g>

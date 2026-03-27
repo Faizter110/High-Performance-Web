@@ -14,7 +14,7 @@ export function useGameSync(matchId: number | null) {
     socket.emit("joinMatch", matchId);
 
     const handleGameState = (state: GameState) => {
-      if (state.matchId !== matchId) return; // ignore events for other match rooms
+      if (state.matchId !== matchId) return;
       queryClient.setQueryData(getGetMatchStateQueryKey(matchId), state);
       if (state.buzzerStatus) {
         setBuzzer(state.buzzerStatus);
@@ -23,7 +23,7 @@ export function useGameSync(matchId: number | null) {
       }
     };
 
-    const handleBuzzer = (team: string) => {
+    const handleBuzzer = ({ team }: { team: string }) => {
       setBuzzer(team);
     };
 
@@ -44,12 +44,20 @@ export function useGameSync(matchId: number | null) {
   }, [matchId, queryClient, socket]);
 
   const emitBuzz = (team: string) => {
-    if (matchId) socket.emit("buzz", { matchId, team });
+    if (matchId) socket.emit("buzz", { matchId, team: team.toLowerCase() });
   };
 
   const emitResetBuzzer = () => {
     if (matchId) socket.emit("resetBuzzer", { matchId });
   };
 
-  return { buzzer, emitBuzz, emitResetBuzzer };
+  const emitOpenBlock = (blockIndex: number) => {
+    if (matchId) socket.emit("openBlock", { matchId, blockIndex });
+  };
+
+  const emitAwardBlock = (blockIndex: number, team: string, questionId?: number | null) => {
+    if (matchId) socket.emit("awardBlock", { matchId, blockIndex, team: team.toLowerCase(), questionId: questionId ?? null });
+  };
+
+  return { buzzer, emitBuzz, emitResetBuzzer, emitOpenBlock, emitAwardBlock };
 }

@@ -4,19 +4,22 @@ let socket: Socket | null = null;
 
 export const getSocket = () => {
   if (!socket) {
-    // Connect to same origin
     socket = io({
-      path: "/socket.io",
+      path: "/api/socket.io",
       transports: ["websocket"],
       autoConnect: true,
     });
-    
+
     socket.on("connect", () => {
       console.log("Connected to game server");
     });
-    
+
     socket.on("disconnect", () => {
       console.log("Disconnected from game server");
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("Socket connection error:", err.message);
     });
   }
   return socket;

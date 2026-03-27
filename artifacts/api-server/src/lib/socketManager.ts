@@ -81,7 +81,7 @@ async function buildStatePayload(matchId: number) {
 export function initSocketIO(httpServer: HttpServer): SocketServer {
   io = new SocketServer(httpServer, {
     cors: { origin: "*" },
-    path: "/socket.io",
+    path: "/api/socket.io",
   });
 
   io.on("connection", (socket) => {
@@ -131,12 +131,13 @@ export function initSocketIO(httpServer: HttpServer): SocketServer {
           .where(eq(gameStatesTable.matchId, matchId));
         if (state?.buzzerStatus) return;
 
+        const normalizedTeam = team.toLowerCase();
         await db
           .update(gameStatesTable)
-          .set({ buzzerStatus: team })
+          .set({ buzzerStatus: normalizedTeam })
           .where(eq(gameStatesTable.matchId, matchId));
 
-        io!.to(`match:${matchId}`).emit("buzzer", { team });
+        io!.to(`match:${matchId}`).emit("buzzer", { team: normalizedTeam });
         const payload = await buildStatePayload(matchId);
         io!.to(`match:${matchId}`).emit("gameState", payload);
       } catch (err) {

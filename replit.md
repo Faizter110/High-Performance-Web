@@ -93,6 +93,15 @@ The `/api/sheets/sync` endpoint syncs questions from Google Sheets.
 Requires the Google Sheets connector to be set up via Replit integrations.
 Sheet format: columns for Question ID, Question Text, Difficulty Badge, Category, Answer.
 
+## Critical Implementation Notes
+
+- **Socket.io path**: Must be `/api/socket.io` on both frontend (`lib/socket.ts`) and backend — the Replit proxy routes `/api/*` → port 8080
+- **Team ownership**: Always lowercase `'red'` / `'blue'` everywhere (DB, socket events, pathfinding). `TeamScore` UI component accepts `'Red' | 'Blue'` for styling only.
+- **Block modal**: Server-driven by `gameState.currentBlockIndex` (not local state). Opens when a block is selected, closes when a block is awarded or question discarded.
+- **DB migrations**: Run `pnpm --filter @workspace/db run push` to create/update tables before first use.
+- **Seeded data**: 25 sample questions pre-loaded in the DB for development/testing.
+- **Artifact workflows**: `artifacts/api-server: API Server` on port 8080 (BASE_PATH=/api); `artifacts/blockbusters: web` on port 23787. Do NOT run a conflicting "Start application" workflow.
+
 ## Socket.io Events
 
 ### Server → Client

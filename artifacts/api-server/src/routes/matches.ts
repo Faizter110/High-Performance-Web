@@ -85,9 +85,10 @@ router.post("/:id/blocks", async (req, res) => {
   const state = await getOrCreateGameState(matchId);
   const blocks = (state.blocks as Block[]) || initBlocks(size);
 
+  const teamNormalized = body.team.toLowerCase() as "red" | "blue";
   const updatedBlocks = blocks.map((b) =>
     b.index === body.blockIndex
-      ? { ...b, owner: body.team as "red" | "blue", questionId: body.questionId ?? null }
+      ? { ...b, owner: teamNormalized, questionId: body.questionId ?? null }
       : b
   );
   const withMatchPoints = computeMatchPoints(updatedBlocks, size);
