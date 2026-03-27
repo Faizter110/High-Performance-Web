@@ -6,8 +6,12 @@ export const getSocket = () => {
   if (!socket) {
     socket = io({
       path: "/api/socket.io",
-      transports: ["websocket"],
+      transports: ["polling", "websocket"],
+      upgrade: true,
       autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
     });
 
     socket.on("connect", () => {

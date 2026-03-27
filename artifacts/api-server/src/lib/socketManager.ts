@@ -102,6 +102,7 @@ export function initSocketIO(httpServer: HttpServer): SocketServer {
     });
 
     socket.on("openBlock", async ({ matchId, blockIndex }: { matchId: number; blockIndex: number }) => {
+      logger.info({ matchId, blockIndex }, "openBlock received");
       try {
         const questions = await db
           .select()
