@@ -1,22 +1,28 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Blockbusters Game Show API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: questions
+    description: Question bank operations
+  - name: matches
+    description: Match management
+  - name: game
+    description: Live game state
+  - name: sheets
+    description: Google Sheets sync
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +30,312 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /questions:
+    get:
+      operationId: getQuestions
+      tags: [questions]
+      summary: Get all questions
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: difficulty
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Question"
+    post:
+      operationId: createQuestion
+      tags: [questions]
+      summary: Create a question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateQuestionInput"
+      responses:
+        "201":
+          description: Created question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+
+  /questions/{id}:
+    get:
+      operationId: getQuestion
+      tags: [questions]
+      summary: Get a question by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateQuestion
+      tags: [questions]
+      summary: Update a question
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateQuestionInput"
+      responses:
+        "200":
+          description: Updated question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+    delete:
+      operationId: deleteQuestion
+      tags: [questions]
+      summary: Delete a question
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /matches:
+    get:
+      operationId: getMatches
+      tags: [matches]
+      summary: Get all matches
+      parameters:
+        - name: tournamentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Match"
+    post:
+      operationId: createMatch
+      tags: [matches]
+      summary: Create a match
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMatchInput"
+      responses:
+        "201":
+          description: Created match
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Match"
+
+  /matches/{id}:
+    get:
+      operationId: getMatch
+      tags: [matches]
+      summary: Get a match by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Match
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Match"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateMatch
+      tags: [matches]
+      summary: Update a match
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMatchInput"
+      responses:
+        "200":
+          description: Updated match
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Match"
+
+  /matches/{id}/state:
+    get:
+      operationId: getMatchState
+      tags: [game]
+      summary: Get current game state for a match
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Game state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameState"
+
+  /matches/{id}/blocks:
+    post:
+      operationId: awardBlock
+      tags: [game]
+      summary: Award a block to a team
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AwardBlockInput"
+      responses:
+        "200":
+          description: Updated game state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameState"
+
+  /matches/{id}/reset:
+    post:
+      operationId: resetMatch
+      tags: [game]
+      summary: Reset match to initial state
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Reset game state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameState"
+
+  /tournaments:
+    get:
+      operationId: getTournaments
+      tags: [matches]
+      summary: Get all tournaments
+      responses:
+        "200":
+          description: List of tournaments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tournament"
+    post:
+      operationId: createTournament
+      tags: [matches]
+      summary: Create a tournament
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTournamentInput"
+      responses:
+        "201":
+          description: Created tournament
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tournament"
+
+  /sheets/sync:
+    post:
+      operationId: syncFromSheets
+      tags: [sheets]
+      summary: Sync questions from Google Sheets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SheetsSyncInput"
+      responses:
+        "200":
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SheetsSyncResult"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +346,244 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    Question:
+      type: object
+      properties:
+        id:
+          type: integer
+        questionId:
+          type: string
+        text:
+          type: string
+        difficulty:
+          type: string
+        category:
+          type: string
+        answer:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+      required:
+        - id
+        - questionId
+        - text
+        - difficulty
+        - category
+        - isActive
+        - createdAt
+
+    CreateQuestionInput:
+      type: object
+      properties:
+        questionId:
+          type: string
+        text:
+          type: string
+        difficulty:
+          type: string
+        category:
+          type: string
+        answer:
+          type: ["string", "null"]
+      required:
+        - questionId
+        - text
+        - difficulty
+        - category
+
+    Tournament:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        event:
+          type: string
+        division:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - event
+        - division
+        - createdAt
+
+    CreateTournamentInput:
+      type: object
+      properties:
+        name:
+          type: string
+        event:
+          type: string
+        division:
+          type: string
+      required:
+        - name
+        - event
+        - division
+
+    Match:
+      type: object
+      properties:
+        id:
+          type: integer
+        matchNumber:
+          type: integer
+        tournamentId:
+          type: ["integer", "null"]
+        redTeamName:
+          type: string
+        blueTeamName:
+          type: string
+        boardSize:
+          type: string
+        status:
+          type: string
+        round:
+          type: ["string", "null"]
+        winnerTeam:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - matchNumber
+        - redTeamName
+        - blueTeamName
+        - boardSize
+        - status
+        - createdAt
+
+    CreateMatchInput:
+      type: object
+      properties:
+        matchNumber:
+          type: integer
+        tournamentId:
+          type: ["integer", "null"]
+        redTeamName:
+          type: string
+        blueTeamName:
+          type: string
+        boardSize:
+          type: string
+        round:
+          type: ["string", "null"]
+      required:
+        - matchNumber
+        - redTeamName
+        - blueTeamName
+        - boardSize
+
+    UpdateMatchInput:
+      type: object
+      properties:
+        status:
+          type: string
+        winnerTeam:
+          type: ["string", "null"]
+        redTeamName:
+          type: string
+        blueTeamName:
+          type: string
+
+    GameState:
+      type: object
+      properties:
+        matchId:
+          type: integer
+        blocks:
+          type: array
+          items:
+            $ref: "#/components/schemas/BlockState"
+        boardSize:
+          type: string
+        redTeamName:
+          type: string
+        blueTeamName:
+          type: string
+        status:
+          type: string
+        winnerTeam:
+          type: ["string", "null"]
+        buzzerStatus:
+          type: ["string", "null"]
+        currentBlockIndex:
+          type: ["integer", "null"]
+        currentQuestion:
+          type: ["object", "null"]
+      required:
+        - matchId
+        - blocks
+        - boardSize
+        - redTeamName
+        - blueTeamName
+        - status
+
+    BlockState:
+      type: object
+      properties:
+        index:
+          type: integer
+        owner:
+          type: ["string", "null"]
+        questionId:
+          type: ["integer", "null"]
+        isMatchPoint:
+          type: boolean
+      required:
+        - index
+        - isMatchPoint
+
+    AwardBlockInput:
+      type: object
+      properties:
+        blockIndex:
+          type: integer
+        team:
+          type: string
+        questionId:
+          type: ["integer", "null"]
+      required:
+        - blockIndex
+        - team
+
+    SheetsSyncInput:
+      type: object
+      properties:
+        spreadsheetId:
+          type: string
+        sheetName:
+          type: string
+      required:
+        - spreadsheetId
+
+    SheetsSyncResult:
+      type: object
+      properties:
+        synced:
+          type: integer
+        skipped:
+          type: integer
+        errors:
+          type: integer
+        message:
+          type: string
+      required:
+        - synced
+        - skipped
+        - errors
+        - message

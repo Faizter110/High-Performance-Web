@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Blockbusters Game Show"
+version = "1.0.0"
+id = "artifacts/blockbusters"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23787
+
+[services.development]
+run = "pnpm --filter @workspace/blockbusters run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/blockbusters", "run", "build" ]
+publicDir = "artifacts/blockbusters/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23787"
+BASE_PATH = "/"

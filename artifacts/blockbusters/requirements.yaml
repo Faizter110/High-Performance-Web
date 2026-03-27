@@ -1,0 +1,19 @@
+packages:
+  "socket.io-client": "Real-time bi-directional communication between Host, Moderator, and Audience"
+  "framer-motion": "Animations for victory banners, modals, and hex block reveals"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility function to efficiently merge Tailwind CSS classes"
+  "lucide-react": "Icons for the UI"
+  "canvas-confetti": "Celebration effect when a team wins"
+
+images:
+  - path: "artifacts/blockbusters/public/images/studio-bg.png"
+    description: "Dark, moody game show studio background with subtle blue and red neon volumetric lighting, professional broadcast aesthetic"
+    aspect_ratio: "16:9"
+  - path: "artifacts/blockbusters/public/images/logo.png"
+    description: "Blockbusters game show logo, bold metallic 3D text with a glowing hexagonal emblem, dark background"
+    aspect_ratio: "16:9"
+
+notes:
+  - Expecting same-origin Socket.io server connection
+  - API endpoints follow standard REST pattern defined in OpenAPI spec

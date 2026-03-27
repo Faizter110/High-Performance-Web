@@ -1,0 +1,30 @@
+Objective: Build a high-performance, real-time web application for the "Blockbusters" game show. The app must support three synchronized user roles (Host, Moderator, Audience) and pull its question database from a Google Sheet.
+1. Data Integration & Architecture
+Google Sheets API: Integrate the app with a Google Sheet to serve as the question bank. The sheet should include columns for: Question ID, Question Text, Difficulty Badge (e.g., Easy, Medium, Hard), and Category.
+Tournament Hierarchy: Implement a navigation structure: Events (Ramadan 2026) → Tournaments (Men’s/Ladies) → Divisions (Adults/Youth) → Rounds (Day 1/Day 2) → Matches.
+Match Management: Matches must track Match #, Team names, Board Size (3x3 or 5x5), and Status (Scheduled, In Progress, Completed).
+2. Visual Layouts (Based on PowerPoint Assets)
+Board Configurations: Support both a 3x3 hexagonal grid (9 blocks) and a 5x5 hexagonal grid (25 blocks).
+Team Colors: Use distinct Red and Blue styling for teams, blocks, and victory banners.
+Header UI: Display "Match #", Team Names, and a "Time Remaining" or "Match Timer" at the top of the screen.
+3. Multi-Role Real-Time Synchronization
+Create three distinct views that stay in sync across different devices using WebSockets or a real-time database:
+Audience View: A read-only, visually optimized hexagonal board showing team progress and the victory banner.
+Host View: An interactive interface for reading questions, viewing buzzer status, and awarding blocks to Red or Blue.
+Moderator View: A "Super-Admin" view with full override power. The moderator must be able to see the next queued question and have the option to Swap (return to pool) or Discard (permanently remove) it before the host opens the block.
+4. Advanced Gameplay Logic
+Pathfinding Engine: Implement real-time logic that calculates and displays the number of "blocks away" each team is from completing a winning path across the board.
+Match Point Detection: The system must automatically identify if a specific block is a "game-winner" for either team. When that block is clicked, display a "Match Point Opportunity" badge to the host and moderator.
+Buzzer System:
+Testing Area: Include a dedicated "Buzzer Status" section on the main dashboard for teams to test equipment without opening a question modal.
+Active Play: Capture the first team to buzz in within a block modal and sync that status instantly to all views.
+Victory Condition: Trigger a "Victory Banner" (e.g., "[Team Name] Wins!") when a team completes a valid path, and auto-update the match status to "Completed."
+5. Technical Performance Requirements
+The application must be "robust and performant" to ensure no lag during high-stakes tournament play.
+State Management: Ensure that actions like awarding a block or resetting a buzzer update all views (Audience, Host, Moderator) immediately without requiring a page refresh.
+
+--------------------------------------------------------------------------------
+Implementation Tips for Replit:
+Environment Variables: Store your Google Sheets API credentials securely in Replit's "Secrets" tool.
+WebSockets: Use a library like Socket.io to handle the real-time synchronization between the Host, Moderator, and Audience views.
+Pathfinding: For the 3x3 and 5x5 boards, use a Breadth-First Search (BFS) or Dijkstra's algorithm to calculate the winning path (Left-to-Right for one team, Top-to-Bottom for the other).
