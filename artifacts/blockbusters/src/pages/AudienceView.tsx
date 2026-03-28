@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useRoute } from 'wouter';
+import { useRoute, useLocation } from 'wouter';
 import { useGetMatch, useGetMatchState } from '@workspace/api-client-react';
 import { useGameSync } from '@/hooks/use-game-sync';
 import { HexBoard } from '@/components/HexBoard';
@@ -7,9 +7,11 @@ import { TeamScore } from '@/components/TeamScore';
 import { findMatchPoints } from '@/lib/hex-utils';
 import { cn } from '@/lib/utils';
 import confetti from 'canvas-confetti';
+import { ArrowLeft } from 'lucide-react';
 
 export default function AudienceView() {
   const [, params] = useRoute("/audience/:id");
+  const [, navigate] = useLocation();
   const matchId = params?.id ? parseInt(params.id) : null;
 
   const { data: match } = useGetMatch(matchId as number, { query: { enabled: !!matchId } });
@@ -56,6 +58,15 @@ export default function AudienceView() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
+      {/* Subtle back button for projection mode — visible on hover */}
+      <button
+        onClick={() => navigate('/audience')}
+        className="absolute top-4 left-4 z-30 p-2 rounded-full bg-white/5 hover:bg-white/20 text-white/30 hover:text-white transition-all duration-200"
+        title="Back to match list"
+      >
+        <ArrowLeft className="w-4 h-4" />
+      </button>
+
       <div className={cn(
         "absolute inset-0 transition-opacity duration-500 pointer-events-none opacity-20",
         buzzer === 'red' && "bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.5),transparent)]",

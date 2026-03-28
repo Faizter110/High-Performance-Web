@@ -1,13 +1,14 @@
 import React from 'react';
-import { useRoute } from 'wouter';
+import { useRoute, useLocation } from 'wouter';
 import { useGetMatch, useGetMatchState } from '@workspace/api-client-react';
 import { useGameSync } from '@/hooks/use-game-sync';
 import { HexBoard } from '@/components/HexBoard';
 import { Card, Button } from '@/components/ui';
-import { Settings, RefreshCw } from 'lucide-react';
+import { Settings, RefreshCw, ArrowLeft } from 'lucide-react';
 
 export default function ModeratorView() {
   const [, params] = useRoute("/moderator/:id");
+  const [, navigate] = useLocation();
   const matchId = params?.id ? parseInt(params.id) : null;
 
   const { data: match } = useGetMatch(matchId as number, { query: { enabled: !!matchId } });
@@ -17,7 +18,7 @@ export default function ModeratorView() {
   if (!match || !gameState) return <div className="min-h-screen text-white p-10">Loading...</div>;
 
   const size = match.boardSize === '5x5' ? 5 : 3;
-  const currentBlockIndex = (gameState as any).currentBlockIndex ?? null;
+  const currentBlockIndex = gameState.currentBlockIndex ?? null;
 
   const handleForceAward = (blockIndex: number, team: 'red' | 'blue') => {
     emitAwardBlock(blockIndex, team, null);
@@ -27,6 +28,13 @@ export default function ModeratorView() {
     <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-white/5 border-b border-white/10 p-4 flex justify-between items-center">
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/moderator')}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            title="Back to match list"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
           <Settings className="text-emerald-500 w-6 h-6" />
           <h1 className="text-xl font-display font-bold text-white">Moderator Override</h1>
         </div>

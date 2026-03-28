@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useRoute } from 'wouter';
+import { useRoute, useLocation } from 'wouter';
 import { useGetMatch, useGetMatchState, BlockState } from '@workspace/api-client-react';
 import { useGameSync } from '@/hooks/use-game-sync';
 import { HexBoard } from '@/components/HexBoard';
@@ -8,10 +8,11 @@ import { Modal } from '@/components/Modal';
 import { Button } from '@/components/ui';
 import { findMatchPoints } from '@/lib/hex-utils';
 import { cn } from '@/lib/utils';
-import { Bell, Trophy } from 'lucide-react';
+import { Bell, Trophy, ArrowLeft } from 'lucide-react';
 
 export default function HostView() {
   const [, params] = useRoute("/host/:id");
+  const [, navigate] = useLocation();
   const matchId = params?.id ? parseInt(params.id) : null;
 
   const { data: match } = useGetMatch(matchId as number, { query: { enabled: !!matchId } });
@@ -61,6 +62,13 @@ export default function HostView() {
       {/* Header */}
       <header className="glass-panel py-4 px-6 flex justify-between items-center z-20 relative">
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/host')}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            title="Back to match list"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
           <div className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wider">
             Host View
           </div>
